@@ -1,3 +1,9 @@
+"""
+Heavily updated from sayamqazi's planet-name-generator
+https://github.com/sayamqazi/planet-name-generator
+"""
+
+
 import random
 
 
