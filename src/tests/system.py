@@ -11,14 +11,22 @@ system = generate_system()
 # print(system)
 
 
-if system is not None and system.suns:
-    sun_tuple: BodyTuple = system.suns[0]
-    sun = BodyWithMetadata(Body(container, Vector2(sun_tuple.x, sun_tuple.y), sun_tuple.mass),
-                           generate_planet_name(), sun_tuple.radius, sun_tuple.color)
-    print(sun)
-
+if system is not None:
     from pygravity.twod.pygame_simulation import Body as SimBody, start_simulation, bodies, Settings
-    sun_sim = SimBody.from_metadata(sun)
-    bodies.append(sun_sim)
-    Settings.focus = sun_sim
+
+    suns = []
+    sun_sims = []
+    for sun_tuple in system.suns:
+        sun = BodyWithMetadata(Body(container, Vector2(sun_tuple.x, sun_tuple.y), sun_tuple.mass),
+                            generate_planet_name(), sun_tuple.radius, sun_tuple.color)
+        sun.body.physics.add_velocity(sun_tuple.x_speed, sun_tuple.y_speed)
+        print(sun)
+        suns.append(sun)
+        sun_sim = SimBody.from_metadata(sun)
+        sun_sims.append(sun_sim)
+        bodies.append(sun_sim)
+
+
+    # Settings.focus = sun_sims[0]
+    Settings.time_scale *= 10
     start_simulation()
