@@ -38,8 +38,10 @@ def generate_system() -> Optional[SystemTuple]:
     )
 
 
-def random_sun_mass():
-    return random.uniform(1.989e30, 2.188e31)
+def random_sun_mass(rand=None):
+    if rand is None:
+        return random.uniform(1.989e30, 2.188e31)
+    return lerp(1.989e30, 2.188e31, rand)
 
 
 def random_sun_color():
@@ -50,17 +52,31 @@ def random_sun_color():
         base_color = list(blue_color)
     else:
         base_color = list(red_color)
-    base_color[1] *= range
+    base_color[1] *= abs(range)
     return tuple(np.array(colorsys.hsv_to_rgb(*base_color)) * 255)
 
 
+def lerp(a, b, f):
+    return (a * (1.0 - f)) + (b * f)
+
+
+def create_sun_radius(value):
+    radius = lerp(6.9634e8, 6.171e11, value)
+    noise = random.uniform(-10000, 10000)
+    return radius + noise
+
+
 def create_sun(position=(0, 0), **extra) -> BodyTuple:
+    sun_value = random.random()
     result = BodyTuple(position[0], position[1],
                        0, 0,
-                       random_sun_mass(),
-                       random.uniform(6.9634e8, 6.171e11),
+                       random_sun_mass(sun_value),
+                       create_sun_radius(sun_value),
                        random_sun_color()
     )
+    if 'mass' in extra:
+        sun_value = (extra['mass'] - 6.9634e8) / (6.171e11 - 6.9634e8)
+        extra.setdefault('radius', lerp(6.9634e8, 6.171e11, sun_value))
     return result._replace(**extra)
 
 
@@ -71,7 +87,7 @@ def create_binary_suns(origin):
     mass2 = random_sun_mass()
     separation2 = (mass1 / (mass1 + mass2)) * separation
     separation1 = separation - separation2
-    velocity1 = random.uniform(300, 3000)
+    velocity1 = random.uniform(300, 30000)
     velocity2 = (mass1 / mass2) * velocity1
 
     orbit_direction = random.choice([-1, 1])
